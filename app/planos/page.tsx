@@ -235,7 +235,7 @@ function PlanCard({ plan }: { plan: typeof PLANS.free }) {
               <p className="text-sm text-green-600 mt-1">
                 ou R$ {plan.annualPrice.toFixed(2).replace('.', ',')}/mês no plano anual
                 <span className="ml-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">
-                  Economize R$ {(plan.monthlyPrice - plan.annualPrice) * 12}
+                  Economize R$ {((plan.monthlyPrice - plan.annualPrice) * 12).toFixed(2).replace('.', ',')}
                 </span>
               </p>
             )}

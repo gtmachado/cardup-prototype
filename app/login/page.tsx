@@ -173,10 +173,10 @@ export default function LoginPage() {
             </div>
 
             <p className="text-center text-sm text-gray-500">
-              Não tem uma conta?{' '}
-              <Link href="/cadastro" className="text-orange-500 font-semibold hover:text-orange-600 transition-colors">
-                Criar conta grátis
-              </Link>
+              Ao criar uma conta, você concorda com nossos{' '}
+              <Link href="/termos" className="text-orange-500 hover:underline">Termos de Uso</Link>
+              {' '}e{' '}
+              <Link href="/privacidade" className="text-orange-500 hover:underline">Política de Privacidade</Link>.
             </p>
           </div>
 

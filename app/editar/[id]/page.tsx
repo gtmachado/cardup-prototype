@@ -14,10 +14,12 @@ import { QuickStartModal } from "@/components/QuickStartModal";
 import { generateMenuPDF } from "@/lib/pdf";
 import { PlanLimitModal } from "@/components/PlanLimitModal";
 import { canCreateSection, canCreateItem } from "@/lib/plans";
+import { useAuth } from "@/context/AuthContext";
 
 export default function EditMenuPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { user, restaurants: userRestaurants, setRestaurants } = useAuth();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [showItemModal, setShowItemModal] = useState(false);
@@ -34,11 +36,20 @@ export default function EditMenuPage() {
 
   useEffect(() => {
     if (params.id) {
-      const found = getRestaurantById(params.id) || mockRestaurants.find((r) => r.id === params.id) || mockRestaurants[0];
+      // First check user restaurants
+      const fromUser = userRestaurants.find((r) => r.id === params.id);
+      // Then check mock restaurants (for admin)
+      const fromMock = mockRestaurants.find((r) => r.id === params.id);
+      // Then check global storage
+      const fromStorage = getRestaurantById(params.id);
+      
+      const found = fromUser || fromMock || fromStorage || mockRestaurants[0];
       setRestaurant(found);
-      setActiveSection(found.sections[0]?.id || "");
+      if (found?.sections[0]) {
+        setActiveSection(found.sections[0].id);
+      }
     }
-  }, [params.id]);
+  }, [params.id, userRestaurants]);
 
   if (!restaurant) {
     return (
@@ -54,9 +65,26 @@ export default function EditMenuPage() {
   const currentSection = restaurant.sections.find((s) => s.id === activeSection);
 
   const handleSave = async () => {
+    if (!restaurant) return;
     setIsSaving(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    updateRestaurant(restaurant);
+    
+    // Update in local state
+    const updatedRestaurants = userRestaurants.map((r) =>
+      r.id === restaurant.id ? restaurant : r
+    );
+    
+    // If not found in user restaurants, add to mock or update
+    if (!updatedRestaurants.find((r) => r.id === restaurant.id)) {
+      const mockIndex = mockRestaurants.findIndex((r) => r.id === restaurant.id);
+      if (mockIndex !== -1) {
+        mockRestaurants[mockIndex] = restaurant;
+      }
+    }
+    
+    setRestaurants(updatedRestaurants.length > 0 ? updatedRestaurants : userRestaurants);
+    updateRestaurant(restaurant, user?.email);
+    
     setIsSaving(false);
     setSaved(true);
     setHasChanges(false);

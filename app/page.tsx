@@ -517,8 +517,8 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Produto</h4>
               <ul className="space-y-3 text-gray-400 text-sm">
-                <li><Link href="#features" className="hover:text-white transition-colors">Recursos</Link></li>
-                <li><Link href="#pricing" className="hover:text-white transition-colors">Preços</Link></li>
+                <li><Link href="/#features" className="hover:text-white transition-colors">Recursos</Link></li>
+                <li><Link href="/planos" className="hover:text-white transition-colors">Preços</Link></li>
                 <li><Link href="/cadastro" className="hover:text-white transition-colors">Cadastro</Link></li>
               </ul>
             </div>
@@ -536,8 +536,8 @@ export default function Home() {
               © 2026 CardUp. Todos os direitos reservados.
             </p>
             <div className="flex gap-6 text-sm text-gray-500">
-              <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-              <a href="#" className="hover:text-white transition-colors">Privacidade</a>
+              <Link href="/termos" className="hover:text-white transition-colors">Termos de Uso</Link>
+              <Link href="/privacidade" className="hover:text-white transition-colors">Privacidade</Link>
             </div>
           </div>
         </div>
