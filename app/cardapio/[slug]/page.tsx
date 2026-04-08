@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import Link from "next/link";
 import { getRestaurantBySlug } from "@/lib/storage";
 import { mockRestaurants } from "@/data/mockData";
-import { Search, X, ChevronLeft, Clock, MapPin, Phone, Heart, Share2 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { Search, X, ChevronLeft, Clock, Heart, Share2, Phone } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 
 export default function PublicMenuPage() {
   const params = useParams<{ slug: string }>();
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,6 +43,31 @@ export default function PublicMenuPage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: restaurant?.name || 'Cardápio Digital',
+      text: `Veja o cardápio de ${restaurant?.name}`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Share cancelled');
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copiado para a área de transferência!');
+    }
+  };
+
+  const handleOrder = () => {
+    const phone = '5511999999999';
+    const message = `Olá! Gostaria de fazer um pedido do cardápio: ${restaurant?.name}`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
 
   if (!slug || !restaurant) {
     return (
@@ -90,30 +116,33 @@ export default function PublicMenuPage() {
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Hero Header */}
       <div className="relative h-56 sm:h-72 overflow-hidden">
-        <Image
-          src={restaurant.banner}
-          alt={restaurant.name}
-          fill
-          className="object-cover"
-          priority
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${restaurant.banner})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
         
         {/* Top bar */}
         <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
-          <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+          <button 
+            onClick={() => router.back()}
+            className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
+          >
             <ChevronLeft className="w-6 h-6 text-gray-700" />
           </button>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setLiked(!liked)}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                liked ? 'bg-red-500 text-white' : 'bg-white/90 backdrop-blur-sm text-gray-700'
+                liked ? 'bg-red-500 text-white' : 'bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white'
               }`}
             >
               <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
             </button>
-            <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+            <button 
+              onClick={handleShare}
+              className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
+            >
               <Share2 className="w-5 h-5 text-gray-700" />
             </button>
           </div>
@@ -124,11 +153,9 @@ export default function PublicMenuPage() {
           <div className="flex items-end justify-between">
             <div className="flex items-end gap-4">
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-white">
-                <Image
+                <img
                   src={restaurant.logo}
                   alt={restaurant.name}
-                  width={80}
-                  height={80}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -139,7 +166,7 @@ export default function PublicMenuPage() {
                     <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                     Aberto
                   </span>
-                  <span className="text-white/80 text-sm">{restaurant.sections.length} categorias</span>
+                  <span className="text-white/80 text-sm">{restaurant.sections.length} seções</span>
                 </div>
               </div>
             </div>
@@ -225,11 +252,9 @@ export default function PublicMenuPage() {
                   <div className="flex gap-4">
                     <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                       {item.image ? (
-                        <Image
+                        <img
                           src={item.image}
                           alt={item.name}
-                          width={112}
-                          height={112}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
@@ -277,7 +302,10 @@ export default function PublicMenuPage() {
 
       {/* Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA] to-transparent pt-8">
-        <button className="w-full bg-gradient-brand text-white py-4 rounded-2xl font-bold text-lg hover:shadow-glow-orange transition-all flex items-center justify-center gap-2">
+        <button 
+          onClick={handleOrder}
+          className="w-full bg-gradient-brand text-white py-4 rounded-2xl font-bold text-lg hover:shadow-glow-orange transition-all flex items-center justify-center gap-2"
+        >
           <Phone className="w-5 h-5" />
           Fazer pedido
         </button>
@@ -287,12 +315,12 @@ export default function PublicMenuPage() {
       <footer className="bg-[#0F0F0F] text-white py-8 mt-12">
         <div className="px-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Image src="/simbolo-cardup.png" alt="" width={20} height={20} className="invert brightness-0" />
+            <img src="/simbolo-cardup.png" alt="" width={20} height={20} className="invert brightness-0" />
             <span className="font-semibold">CardUp</span>
           </div>
           <div className="flex items-center justify-center gap-2 mb-4">
             <span className="text-gray-500 text-xs">Powered by</span>
-            <Image src="/logo-nexor.png" alt="Nexor" width={50} height={14} className="brightness-0 invert opacity-60" />
+            <img src="/logo-nexor.png" alt="Nexor" width={50} height={14} className="brightness-0 invert opacity-60" />
           </div>
           <p className="text-gray-500 text-xs">
             © 2026 CardUp. Todos os direitos reservados.

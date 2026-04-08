@@ -257,7 +257,7 @@ function PlanCard({ plan }: { plan: typeof PLANS.free }) {
       </ul>
 
       <Link
-        href={plan.id === 'free' ? '/cadastro' : '/planos'}
+        href="/cadastro"
         className={`block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all ${
           plan.isPopular
             ? 'bg-gradient-brand text-white hover:shadow-glow-orange'

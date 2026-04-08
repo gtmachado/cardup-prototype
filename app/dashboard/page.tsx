@@ -227,6 +227,7 @@ function DashboardContent({
     { icon: Settings, label: 'Assinaturas', href: '/admin/assinaturas' },
   ] : [
     { icon: User, label: 'Meu Perfil', href: '/perfil' },
+    { icon: QrCode, label: 'Meus QR Codes', href: '/dashboard' },
     { icon: Settings, label: 'Configurações', href: '/perfil' },
   ];
 

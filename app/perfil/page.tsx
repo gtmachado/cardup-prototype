@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { Pencil, Camera, Save, LogOut, Shield, Bell, HelpCircle, ChevronRight, Loader2 } from "lucide-react";
+import { Pencil, Camera, Save, LogOut, Shield, Bell, HelpCircle, ChevronRight, Loader2, Lock, X, ExternalLink } from "lucide-react";
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -17,6 +16,8 @@ export default function PerfilPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [comingSoonFeature, setComingSoonFeature] = useState("");
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -32,6 +33,11 @@ export default function PerfilPage() {
     router.push("/login");
   };
 
+  const handleComingSoon = (feature: string) => {
+    setComingSoonFeature(feature);
+    setShowComingSoon(true);
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header */}
@@ -43,22 +49,17 @@ export default function PerfilPage() {
         
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white/20 shadow-xl">
-              <Image
+            <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white/20 shadow-xl bg-white">
+              <img
                 src={restaurant?.logo || "/simbolo-cardup.png"}
                 alt={restaurant?.name || "Logo"}
-                width={96}
-                height={96}
                 className="w-full h-full object-cover"
               />
             </div>
-            <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-              <Camera className="w-4 h-4 text-gray-600" />
-            </button>
           </div>
           <div className="text-white">
-            <h1 className="text-2xl font-bold">{name}</h1>
-            <p className="text-white/80 text-sm">{email}</p>
+            <h1 className="text-2xl font-bold">{user?.name || 'Usuário'}</h1>
+            <p className="text-white/80 text-sm">{user?.email}</p>
           </div>
         </div>
       </header>
@@ -99,7 +100,7 @@ export default function PerfilPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-2 tracking-wider">
-                NOME DO ESTABELECIMENTO
+                NOME
               </label>
               <input
                 type="text"
@@ -107,7 +108,7 @@ export default function PerfilPage() {
                 onChange={(e) => setName(e.target.value)}
                 disabled={!isEditing}
                 className={`w-full px-4 py-3 rounded-xl text-sm ${
-                  isEditing ? 'bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20' : 'bg-transparent'
+                  isEditing ? 'bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20' : 'bg-transparent border border-transparent'
                 }`}
               />
             </div>
@@ -121,7 +122,7 @@ export default function PerfilPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={!isEditing}
                 className={`w-full px-4 py-3 rounded-xl text-sm ${
-                  isEditing ? 'bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20' : 'bg-transparent'
+                  isEditing ? 'bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20' : 'bg-transparent border border-transparent'
                 }`}
               />
             </div>
@@ -133,36 +134,12 @@ export default function PerfilPage() {
           <h2 className="text-lg font-bold text-[#0F0F0F] p-6 border-b border-gray-100">Configurações</h2>
           
           <div className="divide-y divide-gray-100">
-            {[
-              { icon: Shield, label: 'Privacidade e Segurança', description: 'Gerencie suas configurações de segurança' },
-              { icon: Bell, label: 'Notificações', description: 'Configure como recebe alertas' },
-              { icon: HelpCircle, label: 'Central de Ajuda', description: 'Tire suas dúvidas sobre o CardUp' },
-            ].map((item) => (
-              <button
-                key={item.label}
-                className="w-full flex items-center gap-4 p-5 hover:bg-gray-50 transition-colors text-left"
-              >
-                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                  <item.icon className="w-5 h-5 text-gray-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-[#0F0F0F]">{item.label}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Account section */}
-        <div className="bg-white rounded-3xl shadow-card overflow-hidden">
-          <h2 className="text-lg font-bold text-[#0F0F0F] p-6 border-b border-gray-100">Conta</h2>
-          
-          <div className="divide-y divide-gray-100">
-            <button className="w-full flex items-center gap-4 p-5 hover:bg-gray-50 transition-colors text-left">
+            <button
+              onClick={() => router.push("/redefinir-senha")}
+              className="w-full flex items-center gap-4 p-5 hover:bg-gray-50 transition-colors text-left"
+            >
               <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                <Shield className="w-5 h-5 text-gray-600" />
+                <Lock className="w-5 h-5 text-gray-600" />
               </div>
               <div className="flex-1">
                 <p className="font-medium text-[#0F0F0F]">Alterar senha</p>
@@ -170,6 +147,58 @@ export default function PerfilPage() {
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </button>
+
+            <button
+              onClick={() => handleComingSoon("Notificações")}
+              className="w-full flex items-center gap-4 p-5 hover:bg-gray-50 transition-colors text-left"
+            >
+              <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                <Bell className="w-5 h-5 text-gray-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-[#0F0F0F]">Notificações</p>
+                <p className="text-xs text-gray-500 mt-0.5">Configure como recebe alertas</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
+            
+            <button
+              onClick={() => router.push("/contato")}
+              className="w-full flex items-center gap-4 p-5 hover:bg-gray-50 transition-colors text-left"
+            >
+              <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                <HelpCircle className="w-5 h-5 text-gray-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-[#0F0F0F]">Central de Ajuda</p>
+                <p className="text-xs text-gray-500 mt-0.5">Tire suas dúvidas sobre o CardUp</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* Account section */}
+        <div className="bg-white rounded-3xl shadow-card overflow-hidden">
+          <h2 className="text-lg font-bold text-[#0F0F0F] p-6 border-b border-gray-100">Sua Conta</h2>
+          
+          <div className="divide-y divide-gray-100">
+            <div className="flex items-center gap-4 p-5">
+              <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                <Shield className="w-5 h-5 text-gray-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-[#0F0F0F]">Plano atual</p>
+                <p className="text-xs text-gray-500 mt-0.5">Vitrine (Gratuito)</p>
+              </div>
+              <Link
+                href="/planos"
+                className="text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1"
+              >
+                Fazer upgrade
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
             
             <button
               onClick={handleLogout}
@@ -194,6 +223,34 @@ export default function PerfilPage() {
           </p>
         </div>
       </main>
+
+      {/* Coming Soon Modal */}
+      {showComingSoon && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowComingSoon(false)} />
+          <div className="relative bg-white rounded-3xl w-full max-w-sm p-6 animate-scale-in text-center">
+            <button
+              onClick={() => setShowComingSoon(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg"
+            >
+              <X className="w-5 h-5 text-gray-400" />
+            </button>
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Bell className="w-8 h-8 text-orange-500" />
+            </div>
+            <h3 className="text-xl font-bold text-[#0F0F0F] mb-2">Em breve!</h3>
+            <p className="text-gray-500 mb-6">
+              A funcionalidade "{comingSoonFeature}" está em desenvolvimento e estará disponível em breve.
+            </p>
+            <button
+              onClick={() => setShowComingSoon(false)}
+              className="w-full bg-gradient-brand text-white py-3 rounded-xl font-semibold hover:shadow-glow-orange transition-all"
+            >
+              Entendi!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

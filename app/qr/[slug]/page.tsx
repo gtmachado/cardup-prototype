@@ -156,7 +156,25 @@ export default function QRCodePage() {
                 <Download className="w-5 h-5" />
                 Baixar PNG
               </button>
-              <button className="flex items-center justify-center gap-2 bg-gray-100 text-[#0F0F0F] py-4 rounded-2xl font-semibold hover:bg-gray-200 transition-colors">
+              <button 
+                onClick={async () => {
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({
+                        title: `${restaurant.name} - Cardápio Digital`,
+                        text: `Acesse o cardápio de ${restaurant.name}`,
+                        url: menuUrl,
+                      });
+                    } catch (err) {
+                      console.log('Share cancelled');
+                    }
+                  } else {
+                    navigator.clipboard.writeText(menuUrl);
+                    alert('Link copiado!');
+                  }
+                }}
+                className="flex items-center justify-center gap-2 bg-gray-100 text-[#0F0F0F] py-4 rounded-2xl font-semibold hover:bg-gray-200 transition-colors"
+              >
                 <Share2 className="w-5 h-5" />
                 Compartilhar
               </button>
