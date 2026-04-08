@@ -38,7 +38,7 @@ export default function RecuperarSenhaPage() {
               Esqueceu sua senha?
             </h1>
             <p className="text-gray-400">
-              Não se preocupe! Happens com os melhores. Informe seu e-mail e vamos te ajudar a recuperar o acesso.
+              Não se preocupe! Acontece com os melhores. Informe seu e-mail e vamos te ajudar a recuperar o acesso.
             </p>
           </div>
         </div>

@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { Restaurant } from "@/data/mockData";
 import { 
   Plus, Eye, Pencil, Trash2, QrCode, Settings, LogOut, User,
-  ChevronDown, Menu, X, ExternalLink, MoreVertical, Sparkles
+  ChevronDown, Menu, X, ExternalLink, Sparkles, Check, Edit3
 } from "lucide-react";
 import { PlanLimitModal } from "@/components/PlanLimitModal";
 import { canCreateMenu } from "@/lib/plans";
@@ -16,13 +16,14 @@ import { QuickStartModal } from "@/components/QuickStartModal";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, logout, restaurants, setRestaurants } = useAuth();
+  const { user, logout, restaurants, setRestaurants, isAdmin } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [limitType, setLimitType] = useState<"menus" | "sections" | "items">("menus");
   const [showQuickStart, setShowQuickStart] = useState(false);
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [tempName, setTempName] = useState("");
 
   const handleLogout = () => {
     logout();
@@ -43,6 +44,21 @@ export default function DashboardPage() {
     setRestaurants(updated);
   };
 
+  const handleStartEditName = (restaurant: Restaurant) => {
+    setEditingName(restaurant.id);
+    setTempName(restaurant.name);
+  };
+
+  const handleSaveName = (id: string) => {
+    if (tempName.trim()) {
+      const updated = restaurants.map((r) =>
+        r.id === id ? { ...r, name: tempName.trim(), slug: tempName.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") } : r
+      );
+      setRestaurants(updated);
+    }
+    setEditingName(null);
+  };
+
   const handleNewMenu = () => {
     if (!canCreateMenu("free", restaurants.length)) {
       setLimitType("menus");
@@ -52,8 +68,8 @@ export default function DashboardPage() {
     const count = restaurants.length + 1;
     const newRestaurant: Restaurant = {
       id: String(Date.now()),
-      name: `Novo Cardápio ${count}`,
-      slug: `novo-cardapio-${count}`,
+      name: `Meu Restaurante ${count}`,
+      slug: `meu-restaurante-${count}`,
       email: user?.email || "",
       logo: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop&crop=center",
       banner: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=1200&h=400&fit=crop",
@@ -96,8 +112,126 @@ export default function DashboardPage() {
 
   const firstRestaurant = restaurants[0];
 
+  if (isAdmin) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex">
+        <DashboardContent 
+          user={user}
+          restaurants={restaurants}
+          sidebarOpen={sidebarOpen}
+          mobileMenuOpen={mobileMenuOpen}
+          setSidebarOpen={setSidebarOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+          handleLogout={handleLogout}
+          handleDelete={handleDelete}
+          handleToggle={handleToggle}
+          handleNewMenu={handleNewMenu}
+          handleStartEditName={handleStartEditName}
+          handleSaveName={handleSaveName}
+          editingName={editingName}
+          tempName={tempName}
+          setTempName={setTempName}
+          showLimitModal={showLimitModal}
+          limitType={limitType}
+          setShowLimitModal={setShowLimitModal}
+          showQuickStart={showQuickStart}
+          setShowQuickStart={setShowQuickStart}
+          handleQuickStartImport={handleQuickStartImport}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex">
+      <DashboardContent 
+        user={user}
+        restaurants={restaurants}
+        sidebarOpen={sidebarOpen}
+        mobileMenuOpen={mobileMenuOpen}
+        setSidebarOpen={setSidebarOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        handleLogout={handleLogout}
+        handleDelete={handleDelete}
+        handleToggle={handleToggle}
+        handleNewMenu={handleNewMenu}
+        handleStartEditName={handleStartEditName}
+        handleSaveName={handleSaveName}
+        editingName={editingName}
+        tempName={tempName}
+        setTempName={setTempName}
+        showLimitModal={showLimitModal}
+        limitType={limitType}
+        setShowLimitModal={setShowLimitModal}
+        showQuickStart={showQuickStart}
+        setShowQuickStart={setShowQuickStart}
+        handleQuickStartImport={handleQuickStartImport}
+      />
+    </div>
+  );
+}
+
+interface DashboardContentProps {
+  user: { email: string; name: string } | null;
+  restaurants: Restaurant[];
+  sidebarOpen: boolean;
+  mobileMenuOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+  setMobileMenuOpen: (open: boolean) => void;
+  handleLogout: () => void;
+  handleDelete: (id: string) => void;
+  handleToggle: (id: string) => void;
+  handleNewMenu: () => void;
+  handleStartEditName: (restaurant: Restaurant) => void;
+  handleSaveName: (id: string) => void;
+  editingName: string | null;
+  tempName: string;
+  setTempName: (name: string) => void;
+  showLimitModal: boolean;
+  limitType: "menus" | "sections" | "items";
+  setShowLimitModal: (show: boolean) => void;
+  showQuickStart: boolean;
+  setShowQuickStart: (show: boolean) => void;
+  handleQuickStartImport: (sections: { name: string; items: { name: string; description: string; price: number }[] }[]) => void;
+}
+
+function DashboardContent({
+  user,
+  restaurants,
+  sidebarOpen,
+  mobileMenuOpen,
+  setSidebarOpen,
+  setMobileMenuOpen,
+  handleLogout,
+  handleDelete,
+  handleToggle,
+  handleNewMenu,
+  handleStartEditName,
+  handleSaveName,
+  editingName,
+  tempName,
+  setTempName,
+  showLimitModal,
+  limitType,
+  setShowLimitModal,
+  showQuickStart,
+  setShowQuickStart,
+  handleQuickStartImport,
+}: DashboardContentProps) {
+  const router = useRouter();
+  const { isAdmin } = useAuth();
+
+  const menuItems = isAdmin ? [
+    { icon: User, label: 'Visão Geral', href: '/admin' },
+    { icon: QrCode, label: 'Usuários', href: '/admin/usuarios' },
+    { icon: Settings, label: 'Assinaturas', href: '/admin/assinaturas' },
+  ] : [
+    { icon: User, label: 'Meu Perfil', href: '/perfil' },
+    { icon: Settings, label: 'Configurações', href: '/perfil' },
+  ];
+
+  return (
+    <>
       {/* Sidebar - Desktop */}
       <aside className={`hidden lg:flex flex-col bg-white border-r border-gray-100 transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-20'}`}>
         <div className="p-6 border-b border-gray-100">
@@ -116,33 +250,20 @@ export default function DashboardPage() {
 
         <div className={`p-6 border-b border-gray-100 ${!sidebarOpen ? 'px-4' : ''}`}>
           <div className={`flex items-center ${!sidebarOpen ? 'justify-center' : 'gap-4'}`}>
-            <div className="relative">
-              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-orange-100">
-                <Image
-                  src={firstRestaurant?.logo || "/simbolo-cardup.png"}
-                  alt=""
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${firstRestaurant?.active ? 'bg-green-400' : 'bg-gray-300'}`} />
+            <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center text-white font-bold text-lg">
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-[#0F0F0F] truncate">{firstRestaurant?.name || user?.name}</p>
-                <p className="text-xs text-gray-500 truncate">{user?.email || firstRestaurant?.email}</p>
+                <p className="font-semibold text-[#0F0F0F] truncate">{user?.name}</p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             )}
           </div>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {[
-            { icon: User, label: 'Meu Perfil', href: '/perfil' },
-            { icon: QrCode, label: 'QR Codes', href: '/dashboard' },
-            { icon: Settings, label: 'Configurações', href: '/dashboard' },
-          ].map((item) => (
+          {menuItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
@@ -178,7 +299,7 @@ export default function DashboardPage() {
               </button>
               <div>
                 <h1 className="text-xl font-bold text-[#0F0F0F]">Meus Cardápios</h1>
-                <p className="text-sm text-gray-500">{restaurants.length}/1 cardápio(s) ativo(s)</p>
+                <p className="text-sm text-gray-500">{restaurants.length} cardápio(s)</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -187,15 +308,15 @@ export default function DashboardPage() {
                 className="hidden sm:flex items-center gap-2 text-sm font-medium text-orange-500 hover:text-orange-600"
               >
                 <Sparkles className="w-4 h-4" />
-                Fazer upgrade
+                Planos
               </Link>
-              <Link
-                href="/cadastro"
+              <button
+                onClick={handleNewMenu}
                 className="bg-gradient-brand text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:shadow-glow-orange transition-all flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 <span className="hidden sm:inline">Novo Cardápio</span>
-              </Link>
+              </button>
             </div>
           </div>
         </header>
@@ -233,10 +354,10 @@ export default function DashboardPage() {
                 <div
                   key={restaurant.id}
                   className={`group bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-card-hover transition-all duration-300 ${
-                    !restaurant.active ? 'grayscale' : ''
+                    !restaurant.active ? 'opacity-70' : ''
                   }`}
                 >
-                  <div className="relative h-40 overflow-hidden">
+                  <div className="relative h-40 overflow-hidden cursor-pointer" onClick={() => router.push(`/editar/${restaurant.id}`)}>
                     <Image
                       src={restaurant.banner}
                       alt={restaurant.name}
@@ -255,51 +376,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
 
-                    <div className="absolute top-4 right-4">
-                      <button
-                        onClick={() => setActiveDropdown(activeDropdown === restaurant.id ? null : restaurant.id)}
-                        className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors"
-                      >
-                        <MoreVertical className="w-4 h-4 text-gray-600" />
-                      </button>
-                      
-                      {activeDropdown === restaurant.id && (
-                        <div className="absolute right-0 top-12 bg-white rounded-xl shadow-xl py-2 min-w-[160px] z-20 animate-fade-in">
-                          <button
-                            onClick={() => {
-                              setActiveDropdown(null);
-                              handleToggle(restaurant.id);
-                            }}
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <div className={`w-2 h-2 rounded-full ${restaurant.active ? 'bg-gray-400' : 'bg-green-400'}`} />
-                            {restaurant.active ? 'Desativar' : 'Ativar'}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setActiveDropdown(null);
-                              router.push(`/cardapio/${restaurant.slug}`);
-                            }}
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            Ver público
-                          </button>
-                          <button
-                            onClick={() => {
-                              setActiveDropdown(null);
-                              handleDelete(restaurant.id);
-                            }}
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-500 flex items-center gap-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Excluir
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                    <div className="absolute bottom-4 left-4 right-4">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-lg bg-white">
                           <Image
@@ -310,8 +387,33 @@ export default function DashboardPage() {
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        <div>
-                          <h3 className="text-white font-bold text-lg drop-shadow">{restaurant.name}</h3>
+                        <div className="flex-1 min-w-0">
+                          {editingName === restaurant.id ? (
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="text"
+                                value={tempName}
+                                onChange={(e) => setTempName(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSaveName(restaurant.id)}
+                                className="w-full px-2 py-1 text-sm bg-white rounded-lg border border-gray-200 focus:outline-none focus:border-orange-500"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => handleSaveName(restaurant.id)}
+                                className="p-1 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                              >
+                                <Check className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleStartEditName(restaurant); }}
+                              className="flex items-center gap-1 text-white hover:text-orange-300 transition-colors w-full"
+                            >
+                              <h3 className="font-bold text-lg drop-shadow">{restaurant.name}</h3>
+                              <Edit3 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </button>
+                          )}
                           <p className="text-white/80 text-xs">{restaurant.sections.length} seções</p>
                         </div>
                       </div>
@@ -341,9 +443,10 @@ export default function DashboardPage() {
                         <QrCode className="w-5 h-5 text-orange-500 group-hover/btn:scale-110 transition-transform" />
                       </Link>
                       <Link
-                        href={`/preview/${restaurant.slug}`}
+                        href={`/cardapio/${restaurant.slug}`}
+                        target="_blank"
                         className="p-2 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors group/btn"
-                        title="Visualizar"
+                        title="Ver público"
                       >
                         <Eye className="w-5 h-5 text-blue-500 group-hover/btn:scale-110 transition-transform" />
                       </Link>
@@ -354,6 +457,13 @@ export default function DashboardPage() {
                       >
                         <Pencil className="w-5 h-5 text-green-500 group-hover/btn:scale-110 transition-transform" />
                       </Link>
+                      <button
+                        onClick={() => handleDelete(restaurant.id)}
+                        className="p-2 bg-red-50 hover:bg-red-100 rounded-xl transition-colors group/btn"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-5 h-5 text-red-500 group-hover/btn:scale-110 transition-transform" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -396,26 +506,17 @@ export default function DashboardPage() {
             
             <div className="p-4">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-orange-100">
-                  <Image
-                    src={firstRestaurant?.logo || "/simbolo-cardup.png"}
-                    alt=""
-                    width={48}
-                    height={48}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center text-white font-bold text-lg">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
-                  <p className="font-semibold text-[#0F0F0F]">{firstRestaurant?.name || user?.name}</p>
+                  <p className="font-semibold text-[#0F0F0F]">{user?.name}</p>
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
               </div>
 
               <nav className="space-y-1">
-                {[
-                  { icon: User, label: 'Meu Perfil', href: '/perfil' },
-                  { icon: Settings, label: 'Configurações', href: '/dashboard' },
-                ].map((item) => (
+                {menuItems.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
@@ -456,6 +557,6 @@ export default function DashboardPage() {
         onClose={() => setShowQuickStart(false)}
         onImport={handleQuickStartImport}
       />
-    </div>
+    </>
   );
 }

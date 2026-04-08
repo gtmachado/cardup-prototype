@@ -8,15 +8,16 @@ import {
   ArrowRight, 
   Star,
   CheckCircle,
-  Menu,
-  X
+  Star as StarOutline,
+  Zap as ZapOutline,
+  Crown
 } from "lucide-react";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -29,6 +30,9 @@ export default function Home() {
               <a href="#how-it-works" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors">
                 Como funciona
               </a>
+              <Link href="/contato" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors">
+                Contato
+              </Link>
               <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors">
                 Entrar
               </Link>
@@ -283,6 +287,142 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 lg:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="text-orange-500 font-semibold text-sm uppercase tracking-wider">Planos</span>
+            <h2 className="text-3xl lg:text-4xl font-bold text-[#0F0F0F] mt-3 mb-4">
+              Planos que crescem com você
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Comece grátis e faça upgrade quando precisar. Sem compromisso, sem cartão de crédito.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Free Plan */}
+            <div className="relative bg-white rounded-3xl p-8 border-2 border-gray-100 hover:shadow-xl transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <StarOutline className="w-6 h-6 text-gray-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#0F0F0F]">Vitrine</h3>
+                  <p className="text-xs text-gray-500">Para começar</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-4xl font-bold text-[#0F0F0F]">Grátis</p>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-6">Cardápio digital gratuito para testar o CardUp</p>
+
+              <ul className="space-y-3 mb-8">
+                {['1 cardápio ativo', 'Até 4 seções', 'Até 8 itens por seção', 'Upload de imagens', 'QR Code automático'].map((feature) => (
+                  <li key={feature} className="flex items-start gap-3 text-sm">
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/cadastro"
+                className="block w-full text-center py-3.5 rounded-xl font-semibold text-sm bg-gray-100 text-[#0F0F0F] hover:bg-gray-200 transition-colors"
+              >
+                Começar grátis
+              </Link>
+            </div>
+
+            {/* UP Plan - Popular */}
+            <div className="relative bg-white rounded-3xl p-8 border-2 border-orange-500 shadow-xl shadow-orange-100/50 transform scale-105">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                <span className="bg-gradient-brand text-white px-4 py-1.5 rounded-full text-xs font-semibold">
+                  Mais Popular
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <ZapOutline className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#0F0F0F]">UP</h3>
+                  <p className="text-xs text-gray-500">Mais popular</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-[#0F0F0F]">149</span>
+                  <span className="text-xl font-bold text-[#0F0F0F]">,98</span>
+                  <span className="text-sm text-gray-500">/mês</span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-6">Transforme seu cardápio em PDV completo</p>
+
+              <ul className="space-y-3 mb-8">
+                {['Até 5 cardápios ativos', 'Modo PDV com pagamento', 'Carrinho de compras', 'CRM Básico', 'Analytics Básico', 'Suporte prioritário'].map((feature) => (
+                  <li key={feature} className="flex items-start gap-3 text-sm">
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/cadastro"
+                className="block w-full text-center py-3.5 rounded-xl font-semibold text-sm bg-gradient-brand text-white hover:shadow-glow-orange transition-all"
+              >
+                Assinar UP
+              </Link>
+            </div>
+
+            {/* Gente Grande Plan */}
+            <div className="relative bg-white rounded-3xl p-8 border-2 border-gray-100 hover:shadow-xl transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <Crown className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#0F0F0F]">Gente Grande</h3>
+                  <p className="text-xs text-gray-500">Para quem quer mais</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-[#0F0F0F]">279</span>
+                  <span className="text-xl font-bold text-[#0F0F0F]">,98</span>
+                  <span className="text-sm text-gray-500">/mês</span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-6">Tudo ilimitado + IA + PDV Caixa</p>
+
+              <ul className="space-y-3 mb-8">
+                {['Até 10 cardápios ativos', 'Seções e itens ilimitados', 'Assistente de IA', 'Controle de Pedidos', 'PDV Caixa', 'CRM Completo'].map((feature) => (
+                  <li key={feature} className="flex items-start gap-3 text-sm">
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/cadastro"
+                className="block w-full text-center py-3.5 rounded-xl font-semibold text-sm bg-gray-100 text-[#0F0F0F] hover:bg-gray-200 transition-colors"
+              >
+                Assinar Gente Grande
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
       <section id="how-it-works" className="py-20 lg:py-32 bg-[#0F0F0F] text-white">
         <div className="max-w-7xl mx-auto px-6">
@@ -337,7 +477,7 @@ export default function Home() {
         
         <div className="max-w-4xl mx-auto px-6 text-center relative">
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">
-            Pronto para revolucionar seu restaurante?
+            Pronto para revolutionar seu restaurante?
           </h2>
           <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
             Junte-se a milhares de estabelecimentos que já economizam tempo e aumentaram suas vendas com o CardUp.
@@ -377,17 +517,17 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Produto</h4>
               <ul className="space-y-3 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Recursos</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Preços</a></li>
+                <li><Link href="#features" className="hover:text-white transition-colors">Recursos</Link></li>
+                <li><Link href="#pricing" className="hover:text-white transition-colors">Preços</Link></li>
                 <li><Link href="/cadastro" className="hover:text-white transition-colors">Cadastro</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Suporte</h4>
               <ul className="space-y-3 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contato</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
+                <li><Link href="/contato" className="hover:text-white transition-colors">Central de Ajuda</Link></li>
+                <li><Link href="/contato" className="hover:text-white transition-colors">Contato</Link></li>
+                <li><Link href="/contato" className="hover:text-white transition-colors">FAQ</Link></li>
               </ul>
             </div>
           </div>

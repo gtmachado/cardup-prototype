@@ -1,48 +1,60 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { getAuthUser, setAuthUser, clearAuthUser, getRestaurants, saveRestaurants } from "@/lib/storage";
+import { 
+  getAuthUser, setAuthUser, clearAuthUser, 
+  getRestaurantsByEmail, saveRestaurantsForUser,
+  getUserByEmail, saveUser, type AuthUser
+} from "@/lib/storage";
 import { mockAdmin, mockRestaurants, type Restaurant } from "@/data/mockData";
 
 interface AuthContextType {
-  user: { email: string; name: string } | null;
+  user: AuthUser | null;
   login: (email: string, password: string) => boolean;
   logout: () => void;
   register: (name: string, email: string, password: string) => boolean;
   restaurants: Restaurant[];
   setRestaurants: (restaurants: Restaurant[]) => void;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null);
-  const [restaurants, setRestaurantsState] = useState<Restaurant[]>(mockRestaurants);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [restaurants, setRestaurantsState] = useState<Restaurant[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const stored = getAuthUser();
     if (stored) {
       setUser(stored);
-    }
-    const storedRestaurants = getRestaurants();
-    if (storedRestaurants.length > 0) {
-      setRestaurantsState(storedRestaurants);
+      setIsAdmin(stored.email === mockAdmin.email);
+      if (stored.email === mockAdmin.email) {
+        setRestaurantsState(mockRestaurants);
+      } else {
+        setRestaurantsState(getRestaurantsByEmail(stored.email));
+      }
     }
   }, []);
 
   const login = (email: string, password: string): boolean => {
     if (email === mockAdmin.email && password === mockAdmin.password) {
-      const userData = { email: mockAdmin.email, name: "Admin" };
+      const userData = { email: mockAdmin.email, name: "Admin", plan: 'free' as const };
       setUser(userData);
       setAuthUser(userData);
+      setIsAdmin(true);
+      setRestaurantsState(mockRestaurants);
       return true;
     }
-    const storedRestaurants = getRestaurants();
-    const found = storedRestaurants.find((r) => r.email === email);
-    if (found) {
-      const userData = { email: found.email, name: found.name };
+    
+    const storedUser = getUserByEmail(email);
+    if (storedUser && storedUser.password === password) {
+      const userData = { email: storedUser.email, name: storedUser.name, plan: storedUser.plan };
       setUser(userData);
       setAuthUser(userData);
+      setIsAdmin(false);
+      setRestaurantsState(getRestaurantsByEmail(email));
       return true;
     }
     return false;
@@ -50,36 +62,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    setRestaurantsState([]);
+    setIsAdmin(false);
     clearAuthUser();
   };
 
-  const register = (name: string, email: string, _password: string): boolean => {
-    const newRestaurant: Restaurant = {
-      id: String(Date.now()),
-      name,
-      slug: name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+  const register = (name: string, email: string, password: string): boolean => {
+    const existingUser = getUserByEmail(email);
+    if (existingUser) {
+      return false;
+    }
+    
+    saveUser({
       email,
-      logo: mockRestaurants[0].logo,
-      banner: mockRestaurants[0].banner,
-      active: true,
-      sections: [],
-    };
-    const updated = [...restaurants, newRestaurant];
-    setRestaurantsState(updated);
-    saveRestaurants(updated);
-    const userData = { email, name };
+      name,
+      password,
+      plan: 'free',
+      createdAt: new Date().toISOString(),
+    });
+    
+    const userData = { email, name, plan: 'free' as const };
     setUser(userData);
     setAuthUser(userData);
+    setIsAdmin(false);
+    setRestaurantsState([]);
     return true;
   };
 
-  const setRestaurants = (restaurants: Restaurant[]) => {
-    setRestaurantsState(restaurants);
-    saveRestaurants(restaurants);
+  const setRestaurants = (newRestaurants: Restaurant[]) => {
+    setRestaurantsState(newRestaurants);
+    if (user) {
+      if (user.email === mockAdmin.email) {
+        return;
+      }
+      saveRestaurantsForUser(user.email, newRestaurants);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, restaurants, setRestaurants }}>
+    <AuthContext.Provider value={{ user, login, logout, register, restaurants, setRestaurants, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

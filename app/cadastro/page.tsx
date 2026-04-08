@@ -31,15 +31,20 @@ export default function CadastroPage() {
       return;
     }
     if (name.length < 3) {
-      setError("O nome do estabelecimento deve ter pelo menos 3 caracteres.");
+      setError("O nome deve ter pelo menos 3 caracteres.");
       return;
     }
 
     setIsLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    register(name, email, password);
-    router.push("/dashboard");
+    const success = register(name, email, password);
+    if (success) {
+      router.push("/dashboard");
+    } else {
+      setError("Este e-mail já está cadastrado.");
+      setIsLoading(false);
+    }
   };
 
   return (
